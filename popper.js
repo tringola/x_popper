@@ -1,7 +1,4 @@
 /**
- * Created by tringola on 28/08/2022.
- */
-/**
  * @popperjs/core v2.11.6 - MIT License
  */
 
