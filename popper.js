@@ -249,7 +249,7 @@ function getScroll(element, side = 'top') {
     return element[upperSide];
 }
 
-/*
+/**
  * Sum or subtract the element scroll values (left and top) from a given rect object
  * @method
  * @memberof Popper.Utils
@@ -762,59 +762,6 @@ function runModifiers(modifiers, data, ends) {
 }
 
 /**
- * Updates the position of the popper, computing the new offsets and applying
- * the new style.<br />
- * Prefer `scheduleUpdate` over `update` because of performance reasons.
- * @method
- * @memberof Popper
- */
-function update() {
-    // if popper is destroyed, don't perform any further update
-    if (this.state.isDestroyed) {
-        return;
-    }
-
-    let data = {
-        instance: this,
-        styles: {},
-        arrowStyles: {},
-        attributes: {},
-        flipped: false,
-        offsets: {}
-    };
-
-    // compute reference element offsets
-    data.offsets.reference = getReferenceOffsets(this.state, this.popper, this.reference, this.options.positionFixed);
-
-    // compute auto placement, store placement inside the data object,
-    // modifiers will be able to edit `placement` if needed
-    // and refer to originalPlacement to know the original value
-    data.placement = computeAutoPlacement(this.options.placement, data.offsets.reference, this.popper, this.reference, this.options.modifiers.flip.boundariesElement, this.options.modifiers.flip.padding);
-
-    // store the computed placement inside `originalPlacement`
-    data.originalPlacement = data.placement;
-
-    data.positionFixed = this.options.positionFixed;
-
-    // compute the popper offsets
-    data.offsets.popper = getPopperOffsets(this.popper, data.offsets.reference, data.placement);
-
-    data.offsets.popper.position = this.options.positionFixed ? 'fixed' : 'absolute';
-
-    // run the modifiers
-    data = runModifiers(this.modifiers, data);
-
-    // the first `update` will call `onCreate` callback
-    // the other ones will call `onUpdate` callback
-    if (!this.state.isCreated) {
-        this.state.isCreated = true;
-        this.options.onCreate(data);
-    } else {
-        this.options.onUpdate(data);
-    }
-}
-
-/**
  * Helper used to know if the given modifier is enabled.
  * @method
  * @memberof Popper.Utils
@@ -903,6 +850,7 @@ function attachToScrollParents(scrollParent, event, callback, scrollParents) {
  * @private
  */
 function setupEventListeners(reference, options, state, updateBound) {
+    "use strict";
     // Resize event listener on window
     state.updateBound = updateBound;
     getWindow(reference).addEventListener('resize', state.updateBound, { passive: true });
@@ -916,17 +864,7 @@ function setupEventListeners(reference, options, state, updateBound) {
     return state;
 }
 
-/**
- * It will add resize/scroll events and start recalculating
- * position of the popper element when they are triggered.
- * @method
- * @memberof Popper
- */
-function enableEventListeners() {
-    if (!this.state.eventsEnabled) {
-        this.state = setupEventListeners(this.reference, this.options, this.state, this.scheduleUpdate);
-    }
-}
+
 
 /**
  * Remove event listeners used to update the popper position
@@ -951,19 +889,7 @@ function removeEventListeners(reference, state) {
     return state;
 }
 
-/**
- * It will remove resize/scroll events and won't recalculate popper position
- * when they are triggered. It also won't trigger onUpdate callback anymore,
- * unless you call `update` method manually.
- * @method
- * @memberof Popper
- */
-function disableEventListeners() {
-    if (this.state.eventsEnabled) {
-        cancelAnimationFrame(this.scheduleUpdate);
-        this.state = removeEventListeners(this.reference, this.state);
-    }
-}
+
 
 /**
  * Tells if a given input is a number
@@ -2211,8 +2137,9 @@ modifiers
 
 function Popper(reference, popper, options = {}) {
 
+var self = this;
 
-        this.scheduleUpdate = () => requestAnimationFrame(this.update);
+    this.scheduleUpdate = () => requestAnimationFrame(this.update.bind(this));
 
         // make update() debounced, so that it only runs at most once-per-tick
         //this.update = debounce(this.update.bind(this));
@@ -2255,15 +2182,15 @@ function Popper(reference, popper, options = {}) {
     });
 
         // fire the first update to position the popper in the right place
-        this.update();
+        self.update();
 
         const eventsEnabled = this.options.eventsEnabled;
         if (eventsEnabled) {
             // setup event listeners, they will take care of update the position in specific situations
-            this.enableEventListeners();
+            self.enableEventListeners();
         }
 
-        this.state.eventsEnabled = eventsEnabled;
+        self.state.eventsEnabled = eventsEnabled;
 
 
 
@@ -2292,18 +2219,97 @@ function Popper(reference, popper, options = {}) {
      */
 }
 
-Popper.prototype.update=function(){
-    return update.call(this)
+
+/**
+ * Updates the position of the popper, computing the new offsets and applying
+ * the new style.<br />
+ * Prefer `scheduleUpdate` over `update` because of performance reasons.
+ * @method
+ * @memberof Popper
+ */
+Popper.prototype.update = function() {
+    "use strict";
+    // if popper is destroyed, don't perform any further update
+    var self = this;
+    if (self.state.isDestroyed) {
+        return;
+    }
+
+    let data = {
+        instance: self,
+        styles: {},
+        arrowStyles: {},
+        attributes: {},
+        flipped: false,
+        offsets: {}
+    };
+
+    // compute reference element offsets
+    data.offsets.reference = getReferenceOffsets(self.state,self.popper, self.reference,self.options.positionFixed);
+
+    // compute auto placement, store placement inside the data object,
+    // modifiers will be able to edit `placement` if needed
+    // and refer to originalPlacement to know the original value
+    data.placement = computeAutoPlacement(this.options.placement, data.offsets.reference, self.popper, self .reference, self .options.modifiers.flip.boundariesElement, self .options.modifiers.flip.padding);
+
+    // store the computed placement inside `originalPlacement`
+    data.originalPlacement = data.placement;
+
+    data.positionFixed = self .options.positionFixed;
+
+    // compute the popper offsets
+    data.offsets.popper = getPopperOffsets(self .popper, data.offsets.reference, data.placement);
+
+    data.offsets.popper.position = self.options.positionFixed ? 'fixed' : 'absolute';
+
+    // run the modifiers
+    data = runModifiers(self.modifiers, data);
+
+    // the first `update` will call `onCreate` callback
+    // the other ones will call `onUpdate` callback
+    if (!self.state.isCreated) {
+        self.state.isCreated = true;
+        self.options.onCreate(data);
+    } else {
+        self.options.onUpdate(data);
+    }
 };
+
+
+
 Popper.prototype.destroy=function(){
-    return destroy.call(this)
+    "use strict";
+    let self =  this;
+    return destroy.call(self);
 };
-Popper.prototype.enableEventListeners=function(){
-    return enableEventListeners.call(this)
+/**
+ * It will add resize/scroll events and start recalculating
+ * position of the popper element when they are triggered.
+ * @method
+ * @memberof Popper
+ */
+Popper.prototype. enableEventListeners = function() {
+    "use strict";
+    var self = this;
+    if (!self.state.eventsEnabled) {
+        self.state = setupEventListeners(self.reference, self.options, self.state, self.scheduleUpdate);
+    }
 };
-Popper.prototype.disableEventListeners=function(){
-    return disableEventListeners.call(this)
-};
+/**
+ * It will remove resize/scroll events and won't recalculate popper position
+ * when they are triggered. It also won't trigger onUpdate callback anymore,
+ * unless you call `update` method manually.
+ * @method
+ * @memberof Popper
+ */
+Popper.prototype.disableEventListeners= function () {
+    "use strict";
+    var self=this;
+    if (self.state.eventsEnabled) {
+        cancelAnimationFrame(self.scheduleUpdate);
+        self.state = removeEventListeners(self.reference, self.state);
+    }
+}
 
 /**
  * The `referenceObject` is an object that provides an interface compatible with Popper.js
@@ -2330,3 +2336,4 @@ Popper.placements = placements;
 Popper.Defaults = Defaults;
 
 
+//# sourceMappingURL=popper.js.map
