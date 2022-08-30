@@ -72,12 +72,12 @@
     <div id="arrow" data-popper-arrow></div>
 </div>
 </body>
-<script src="popper.js" ></script>
+<script src="popperV1.x.js" ></script>
 <script>
     const popcorn = document.querySelector('#popcorn');
     const tooltip = document.querySelector('#tooltip');
 
-    createPopper(popcorn, tooltip, {
+    new Popper(popcorn, tooltip, {
         placement: 'top',
         modifiers: [
             {
