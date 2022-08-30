@@ -33,45 +33,6 @@ for (let i = 0; i < longerTimeoutBrowsers.length; i += 1) {
     }
 }
 
-/*function microtaskDebounce(fn) {
-    let called = false;
-    return () => {
-        if (called) {
-            return;
-        }
-        called = true;
-        window.Promise.resolve().then(() => {
-            called = false;
-        fn();
-    });
-    };
-}
-
-function taskDebounce(fn) {
-    let scheduled = false;
-    return () => {
-        if (!scheduled) {
-            scheduled = true;
-            setTimeout(() => {
-                scheduled = false;
-            fn();
-        }, timeoutDuration);
-        }
-    };
-}
-
-const supportsMicroTasks = isBrowser && window.Promise;
-
-/**
- * Create a debounced version of a method, that's asynchronously deferred
- * but called in the minimum time possible.
- *
- * @method
- * @memberof Popper.Utils
- * @argument {Function} fn
- * @returns {Function}
- */
-//var debounce = supportsMicroTasks ? microtaskDebounce : taskDebounce;
 
 /**
  * Check if the given variable is a function
@@ -2237,19 +2198,20 @@ modifiers
  * @callback onUpdate
  * @param {dataObject} data
  */
-
+/**
+ * Create a new Popper.js instance
+ * @class Popper
+ * @param {HTMLElement|referenceObject} reference - The reference element used to position the popper
+ * @param {HTMLElement} popper - The HTML element used as popper.
+ * @param {Object} options - Your custom options to override the ones defined in [Defaults](#defaults)
+ * @return {Object} instance - The generated Popper.js instance
+ */
 // Utils
 // Methods
-class Popper {
-    /**
-     * Create a new Popper.js instance
-     * @class Popper
-     * @param {HTMLElement|referenceObject} reference - The reference element used to position the popper
-     * @param {HTMLElement} popper - The HTML element used as popper.
-     * @param {Object} options - Your custom options to override the ones defined in [Defaults](#defaults)
-     * @return {Object} instance - The generated Popper.js instance
-     */
-    constructor(reference, popper, options = {}) {
+
+function Popper(reference, popper, options = {}) {
+
+
         this.scheduleUpdate = () => requestAnimationFrame(this.update);
 
         // make update() debounced, so that it only runs at most once-per-tick
@@ -2302,22 +2264,8 @@ class Popper {
         }
 
         this.state.eventsEnabled = eventsEnabled;
-    }
 
-    // We can't use class properties because they don't get listed in the
-    // class prototype and break stuff like Sinon stubs
-    update() {
-        return update.call(this);
-    }
-    destroy() {
-        return destroy.call(this);
-    }
-    enableEventListeners() {
-        return enableEventListeners.call(this);
-    }
-    disableEventListeners() {
-        return disableEventListeners.call(this);
-    }
+
 
     /**
      * Schedule an update, it will run on the next UI update available
@@ -2344,6 +2292,19 @@ class Popper {
      */
 }
 
+Popper.prototype.update=function(){
+    return update.call(this)
+};
+Popper.prototype.destroy=function(){
+    return destroy.call(this)
+};
+Popper.prototype.enableEventListeners=function(){
+    return enableEventListeners.call(this)
+};
+Popper.prototype.disableEventListeners=function(){
+    return disableEventListeners.call(this)
+};
+
 /**
  * The `referenceObject` is an object that provides an interface compatible with Popper.js
  * and lets you use it as replacement of a real DOM node.<br />
@@ -2364,9 +2325,8 @@ class Popper {
  * An ES6 getter that will return the height of the virtual reference element.
  */
 
-Popper.Utils = (typeof window !== 'undefined' ? window : global).PopperUtils;
+
 Popper.placements = placements;
 Popper.Defaults = Defaults;
 
 
-//# sourceMappingURL=popper.js.map
