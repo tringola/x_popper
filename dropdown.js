@@ -17,6 +17,7 @@ function PopupInstance(starter,template,popupArrow) {
     starter.addEventListener("click",function(){
         self.togglePopper();
     })
+
 }
 
 //destroy popper instance
